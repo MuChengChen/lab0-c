@@ -450,6 +450,41 @@ void q_sort(struct list_head *head, bool descend)
 int q_ascend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
+
+    if (head && head->next != head && head->next->next != head) {
+        q_sort(head, false);
+
+        struct list_head *node, *safe;
+
+        int node_num = 1;
+
+        list_for_each_safe(node, safe, head) {
+            if (safe == head) {
+                break;
+            }
+
+            element_t *safe_element_ptr = container_of(safe, element_t, list);
+
+            if (strcmp(container_of(node, element_t, list)->value,
+                       safe_element_ptr->value) >= 0) {
+                list_del(safe);
+
+                safe = node;
+
+
+                if (safe_element_ptr->value) {
+                    free(safe_element_ptr->value);
+                }
+                free(safe_element_ptr);
+
+            } else {
+                node_num++;
+            }
+        }
+
+        return node_num;
+    }
+
     return 0;
 }
 
