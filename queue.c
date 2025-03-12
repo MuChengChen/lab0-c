@@ -536,5 +536,100 @@ int q_descend(struct list_head *head)
 int q_merge(struct list_head *head, bool descend)
 {
     // https://leetcode.com/problems/merge-k-sorted-lists/
-    return 0;
+
+    if (head && head->next != head && head->next->next != head) {
+        struct list_head *first_queue = head->next, *node;
+        for (node = (head)->next->next; node != (head); node = node->next) {
+            queue_contex_t *first_queue_contex =
+                container_of(first_queue, queue_contex_t, chain);
+
+
+            if (container_of(node, queue_contex_t, chain)->size == 0) {
+                continue;
+            }
+
+            struct list_head *first_q_next = NULL;
+            struct list_head *first_q_tail = NULL;
+
+            struct list_head **tmp_first_head = NULL;
+
+
+
+            if (first_queue_contex->q &&
+                first_queue_contex->q->next != first_queue_contex->q) {
+                first_q_tail = first_queue_contex->q->prev;
+                tmp_first_head = &first_q_tail;
+                (*tmp_first_head)->next = NULL;
+
+                first_q_next = first_queue_contex->q->next;
+                tmp_first_head = &first_q_next;
+                (*tmp_first_head)->prev = NULL;
+
+                INIT_LIST_HEAD(first_queue_contex->q);
+            }
+
+
+            struct list_head *node_q_next = NULL;
+            struct list_head *node_q_tail = NULL;
+
+            struct list_head **tmp_node_head = NULL;
+
+            queue_contex_t *node_queue_contex =
+                container_of(node, queue_contex_t, chain);
+
+            node_q_tail = node_queue_contex->q->prev;
+            tmp_node_head = &node_q_tail;
+            (*tmp_node_head)->next = NULL;
+
+            node_q_next = node_queue_contex->q->next;
+            tmp_node_head = &node_q_next;
+            (*tmp_node_head)->prev = NULL;
+
+            INIT_LIST_HEAD(node_queue_contex->q);
+
+            struct list_head *merge_list = NULL;
+
+            if (!tmp_first_head) {
+                merge_list = mergeTwoLists(NULL, *tmp_node_head, descend);
+            } else {
+                merge_list =
+                    mergeTwoLists(*tmp_first_head, *tmp_node_head, descend);
+            }
+
+
+
+            struct list_head *tail = merge_list;
+
+            if (merge_list->next) {
+                list_for_each(tail, merge_list) {
+                    if (!tail->next) {
+                        break;
+                    }
+                }
+            }
+
+            merge_list->prev = first_queue_contex->q;
+            first_queue_contex->q->next = merge_list;
+
+            first_queue_contex->q->prev = tail;
+            tail->next = first_queue_contex->q;
+        }
+    }
+
+
+
+    if (head && head->next != head) {
+        struct list_head *count;
+        int node_num = 0;
+        if (container_of(head->next, queue_contex_t, chain)->q) {
+            list_for_each(count,
+                          container_of(head->next, queue_contex_t, chain)->q) {
+                node_num++;
+            }
+        }
+
+        return node_num;
+    } else {
+        return 0;
+    }
 }
