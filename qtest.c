@@ -1056,6 +1056,48 @@ static bool do_next(int argc, char *argv[])
     return q_show(0);
 }
 
+static bool do_shuffle(int argc, char *argv[])
+{
+    if (argc != 1) {
+        report(1, "%s takes no arguments", argv[0]);
+        return false;
+    }
+
+    int cnt = 0;
+
+    if (!current || !current->q)
+        report(3, "Warning: Calling shuffle on null queue");
+    else
+        cnt = q_size(current->q);
+    error_check();
+
+    if (cnt < 2)
+        report(3, "Warning: Calling shuffle on single node");
+    error_check();
+
+    struct list_head *old = current->q->next;
+    struct list_head *new = current->q->prev;
+    struct list_head *tmp;
+    int rand_index;
+    for (int i = cnt - 1; i > 0; i--) {
+        q_show(3);
+        rand_index = rand() % i;
+        for (int j = rand_index; j > 0; j--) {
+            old = old->next;
+        }
+        tmp = new->next;
+        list_del_init(new);
+        list_add(new, old);
+        list_del_init(old);
+        list_add(old, tmp->prev);
+
+        new = old->prev;
+        old = current->q->next;
+    }
+    q_show(3);
+    return true;
+}
+
 static void console_init()
 {
     ADD_COMMAND(new, "Create new queue", "");
@@ -1096,6 +1138,8 @@ static void console_init()
                 "");
     ADD_COMMAND(reverseK, "Reverse the nodes of the queue 'K' at a time",
                 "[K]");
+    ADD_COMMAND(shuffle, "Shuffle the queue using the Fisher-Yates algorithm",
+                "");
     add_param("length", &string_length, "Maximum length of displayed string",
               NULL);
     add_param("malloc", &fail_probability, "Malloc failure probability percent",
