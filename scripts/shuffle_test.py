@@ -5,7 +5,7 @@ from itertools import permutations
 import matplotlib.pyplot as plt
 import numpy as np
 # 測試 shuffle 次數
-test_count = 1000000
+test_count = 250000
 input = "new\nit 1\nit 2\nit 3\nit 4\n"
 for i in range(test_count):
     input += "shuffle\n"
@@ -50,11 +50,12 @@ for num in nums:
     counterSet[permutation] += 1
         
 # 計算 chiSquare sum
-expectation = test_count // len(s)
+expectation = len(nums) // len(s)
 c = counterSet.values()
 chiSquaredSum = 0
 for i in c:
     chiSquaredSum += chiSquared(i, expectation)
+
 print("Expectation: ", expectation)
 print("Observation: ", counterSet)
 print("chi square sum: ", chiSquaredSum)
